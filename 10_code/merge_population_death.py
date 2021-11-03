@@ -44,6 +44,33 @@ merged = cause_of_death.merge(
 assert merged[merged["_merge"] != "both"].empty
 assert [not merged[col].isnull().any() for col in merged.columns]
 
+# subset to just D1, D2, D4 drug overdose deaths
+overdose_deaths = merged[
+    (merged["Drug/Alcohol Induced Cause Code"] == "D1")
+    | (merged["Drug/Alcohol Induced Cause Code"] == "D2")
+    | (merged["Drug/Alcohol Induced Cause Code"] == "D4")
+].copy()
+
+# total all drug overdose deaths for each state-county-year
+overdose_deaths["Total Deaths By Overdose"] = overdose_deaths.groupby(
+    ["State", "County", "Year"]
+)["Deaths"].transform(np.sum)
+overdose_deaths.drop_duplicates(
+    subset=["Year", "State", "County", "Total Deaths By Overdose"], inplace=True
+)
+
+# drop remaining unnecessary columns
+overdose_deaths.drop(
+    labels=[
+        "Drug/Alcohol Induced Cause",
+        "Drug/Alcohol Induced Cause Code",
+        "Deaths",
+        "_merge",
+    ],
+    axis=1,
+    inplace=True,
+)
+
 # write output file
 merged.to_csv(
     "~/720/pds2021-opioids-team-8-1/20_intermediate_files/Death_and_Population.csv"
