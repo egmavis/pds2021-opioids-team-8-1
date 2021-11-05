@@ -76,10 +76,10 @@ overdose_deaths.drop(
 )
 
 # write output file
-merged.to_csv(
+overdose_deaths.to_csv(
     "~/720/pds2021-opioids-team-8-1/20_intermediate_files/Death_and_Population.csv"
 )
-merged.to_parquet(
+overdose_deaths.to_parquet(
     "~/720/pds2021-opioids-team-8-1/20_intermediate_files/Death_and_Population.gzip",
     compression="gzip",
 )
