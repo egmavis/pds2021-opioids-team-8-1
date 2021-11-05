@@ -55,9 +55,13 @@ overdose_deaths = merged[
 overdose_deaths["Total Deaths By Overdose"] = overdose_deaths.groupby(
     ["State", "County", "Year"]
 )["Deaths"].transform(np.sum)
+
 overdose_deaths.drop_duplicates(
     subset=["Year", "State", "County", "Total Deaths By Overdose"], inplace=True
 )
+
+# validity check for duplicates
+assert ~overdose_deaths.duplicated(["Year", "State", "County"]).any()
 
 # drop remaining unnecessary columns
 overdose_deaths.drop(
