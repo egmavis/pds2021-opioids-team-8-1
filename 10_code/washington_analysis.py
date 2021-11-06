@@ -11,7 +11,9 @@ data = pd.read_csv(
 assert ~data.duplicated(["Year", "State", "County"]).any()
 assert ~data.isna().any().sum()
 
-data["Overdose_Death_Rate"] = (data["Total Deaths By Overdose"] / data.Population) * 100
+data["Overdose_Deaths_per_Capita"] = (
+    data["Total Deaths By Overdose"] / data.Population
+) * 100
 
 # subset to target states
 wash = data[data.State == "WA"]
@@ -19,13 +21,108 @@ okl = data[data.State == "OK"]
 arz = data[data.State == "AZ"]
 col = data[data.State == "CO"]
 
+# break washington into pre and post subsets for pre-post analysis
+wash_pre = wash[wash.Year < 2012]
+wash_post = wash[wash.Year >= 2012]
+
+# add vertical line for year = 2012 (policy change)
+line = (
+    alt.Chart(wash)
+    .transform_quantile("Year", probs=[0.75], as_=["prob", "value"])
+    .mark_rule()
+    .encode(x="value:Q")
+)
+
 # same arguments for each chart
-yvar = "Overdose_Death_Rate"
+yvar = "Overdose_Deaths_per_Capita"
 xvar = "Year"
 alpha = 0.05
 
 """
-WASHINGTON CHART
+PRE-POST ANALYSIS
+"""
+
+"""
+Pre-Policy Charts
+"""
+# Grid for predicted values
+wash_pre_x = wash_pre.loc[pd.notnull(wash_pre[yvar]), xvar]
+wash_pre_xmin = wash_pre_x.min()
+wash_pre_xmax = wash_pre_x.max()
+wash_pre_step = (wash_pre_xmax - wash_pre_xmin) / 100
+wash_pre_grid = np.arange(wash_pre_xmin, wash_pre_xmax + wash_pre_step, wash_pre_step)
+wash_pre_predictions = pd.DataFrame({xvar: wash_pre_grid})
+
+# Fit model, get predictions
+wash_pre_model = smf.ols(f"{yvar} ~ {xvar}", data=wash_pre).fit()
+wash_pre_model_predict = wash_pre_model.get_prediction(wash_pre_predictions[xvar])
+wash_pre_predictions[yvar] = wash_pre_model_predict.summary_frame()["mean"]
+wash_pre_predictions[["ci_low", "ci_high"]] = wash_pre_model_predict.conf_int(
+    alpha=alpha
+)
+
+# Build chart
+wash_pre_reg = (
+    alt.Chart(wash_pre_predictions)
+    .mark_line()
+    .encode(x=xvar, y=alt.Y(yvar, scale=alt.Scale(zero=False)))
+)
+wash_pre_ci = (
+    alt.Chart(wash_pre_predictions)
+    .mark_errorband()
+    .encode(
+        x=xvar,
+        y=alt.Y("ci_low", title=yvar),
+        y2="ci_high",
+    )
+)
+
+"""
+Post-Policy Charts
+"""
+# Grid for predicted values
+wash_post_x = wash_post.loc[pd.notnull(wash_post[yvar]), xvar]
+wash_post_xmin = wash_post_x.min()
+wash_post_xmax = wash_post_x.max()
+wash_post_step = (wash_post_xmax - wash_post_xmin) / 100
+wash_post_grid = np.arange(
+    wash_post_xmin, wash_post_xmax + wash_post_step, wash_post_step
+)
+wash_post_predictions = pd.DataFrame({xvar: wash_post_grid})
+
+# Fit model, get predictions
+wash_post_model = smf.ols(f"{yvar} ~ {xvar}", data=wash_post).fit()
+wash_post_model_predict = wash_post_model.get_prediction(wash_post_predictions[xvar])
+wash_post_predictions[yvar] = wash_post_model_predict.summary_frame()["mean"]
+wash_post_predictions[["ci_low", "ci_high"]] = wash_post_model_predict.conf_int(
+    alpha=alpha
+)
+
+# Build chart
+wash_post_reg = (
+    alt.Chart(wash_post_predictions)
+    .mark_line()
+    .encode(x=xvar, y=alt.Y(yvar, scale=alt.Scale(zero=False)))
+)
+wash_post_ci = (
+    alt.Chart(wash_post_predictions)
+    .mark_errorband()
+    .encode(
+        x=xvar,
+        y=alt.Y("ci_low", title=yvar),
+        y2="ci_high",
+    )
+)
+
+pre_chart = wash_pre_ci + wash_pre_reg
+post_chart = wash_post_ci + wash_post_reg
+
+"""
+DIFFERENCE-IN-DIFFERENCE ANALYSIS
+"""
+
+"""
+Washington Chart
 """
 
 # Grid for predicted values
@@ -59,7 +156,7 @@ wa_ci = (
 )
 
 """
-OKLAHOMA CHART
+Oklahoma Chart
 """
 
 # Grid for predicted values
@@ -93,7 +190,7 @@ okl_ci = (
 )
 
 """
-ARIZONA CHART
+Arizona Chart
 """
 
 # Grid for predicted values
@@ -127,7 +224,7 @@ arz_ci = (
 )
 
 """
-COLORADO CHART
+Colorado Chart
 """
 
 # Grid for predicted values
@@ -166,16 +263,10 @@ arz_chart = arz_ci + arz_reg
 okl_chart = okl_ci + okl_reg
 wa_chart = wa_ci + wa_reg
 
-# add vertical line for year = 2012 (policy change)
-line = (
-    alt.Chart(wash)
-    .transform_quantile("Year", probs=[0.75], as_=["prob", "value"])
-    .mark_rule()
-    .encode(x="value:Q")
-)
+# pre-post analysis chart
+pre_post_chart = alt.layer(pre_chart, post_chart, line).properties()
 
-
-# the pre-post charts
+# the diff-in-diff charts between each comparison state
 wash_vs_okl = alt.layer(wa_chart, okl_chart, line).properties(
     title="Overdose Death Rates in Washington vs. Oklahoma"
 )
