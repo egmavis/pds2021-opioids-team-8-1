@@ -20,7 +20,7 @@ def basic_data_validity_check(df):
 
 # If we need to change the target states in the future, change this method
 def check_state(county):
-    target_list = ["Fl", "TX", "WA", "AZ", "LA", "CO", "WI", "MS", "KS", "OK"]
+    target_list = ["FL", "TX", "WA", "AZ", "LA", "CO", "WI", "MS", "KS", "OK"]
     state = county.split(", ")[1]
     return 1 if state in target_list else 0
 

@@ -69,7 +69,7 @@ def validity_check(df):
 
 if __name__ == "__main__":
     # Read population data for all target states
-    state_list = ["Fl", "TX", "WA", "AZ", "LA", "CO", "WI", "MS", "KS", "OK"]
+    state_list = ["FL", "TX", "WA", "AZ", "LA", "CO", "WI", "MS", "KS", "OK"]
 
     old_xls_list = []
     new_xlsx_list = []

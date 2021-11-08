@@ -1,12 +1,13 @@
 import pandas as pd
 import numpy as np
+import pathlib
 
 # read in files to merge
 population = pd.read_csv(
-    "~/720/pds2021-opioids-team-8-1/20_intermediate_files/Population_2000-2019.csv"
+    f"{pathlib.Path.cwd()}/20_intermediate_files/Population_2000-2019.csv"
 )
 cause_of_death = pd.read_csv(
-    "~/720/pds2021-opioids-team-8-1/20_intermediate_files/Underlying Cause of Death, 2003-2015.csv"
+    f"{pathlib.Path.cwd()}/20_intermediate_files/Underlying Cause of Death, 2003-2015.csv"
 )
 
 # extract state from county column in cause_of_death
@@ -81,5 +82,3 @@ overdose_deaths.to_csv(
 )
 overdose_deaths.to_parquet(
     "~/720/pds2021-opioids-team-8-1/20_intermediate_files/Death_and_Population.gzip",
-    compression="gzip",
-)
