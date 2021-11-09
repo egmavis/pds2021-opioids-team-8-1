@@ -23,27 +23,30 @@ if __name__ == "__main__":
     # Pre-post analysis
     year = 2010
     line = get_vertical_line(year)
-    FL_pre, FL_post = pre_post_analysis(FL, year)
-    FL_pre_post_chart = alt.layer(FL_pre, FL_post, line).properties()
+    FL_pre, FL_post = pre_post_analysis(FL, year, "blue")
+    FL_pre_post_chart = alt.layer(FL_pre, FL_post, line).properties(
+        title="Overdose Death Rates in Florida"
+    )
     FL_pre_post_chart.save(f"{path_prefix}FL.png")
 
     # The diff-in-diff charts between each comparison state
     # Texas vs. Arizona
-    AZ_pre, AZ_post = pre_post_analysis(AZ, year)
+    ref_color = "green"
+    AZ_pre, AZ_post = pre_post_analysis(AZ, year, ref_color)
     FL_vs_AZ = alt.layer(FL_pre_post_chart, AZ_pre + AZ_post, line).properties(
         title="Overdose Death Rates in Florida vs. Arizona"
     )
     FL_vs_AZ.save(f"{path_prefix}FL_vs_AZ.png")
 
     # Texas vs. Louisiana
-    LA_pre, LA_post = pre_post_analysis(LA, year)
+    LA_pre, LA_post = pre_post_analysis(LA, year, ref_color)
     FL_vs_LA = alt.layer(FL_pre_post_chart, LA_pre + LA_post, line).properties(
         title="Overdose Death Rates in Florida vs. Louisiana"
     )
     FL_vs_LA.save(f"{path_prefix}FL_vs_LA.png")
 
     # Texas vs. Colorado
-    CO_pre, CO_post = pre_post_analysis(CO, year)
+    CO_pre, CO_post = pre_post_analysis(CO, year, ref_color)
     FL_vs_CO = alt.layer(FL_pre_post_chart, CO_pre + CO_post, line).properties(
         title="Overdose Death Rates in Florida vs. Colorado"
     )
