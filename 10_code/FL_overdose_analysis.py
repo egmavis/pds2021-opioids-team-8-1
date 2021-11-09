@@ -31,20 +31,20 @@ if __name__ == "__main__":
     # Texas vs. Arizona
     AZ_pre, AZ_post = pre_post_analysis(AZ, year)
     FL_vs_AZ = alt.layer(FL_pre_post_chart, AZ_pre + AZ_post, line).properties(
-        title="Overdose Death Rates in Texas vs. AZsconsin"
+        title="Overdose Death Rates in Florida vs. Arizona"
     )
     FL_vs_AZ.save(f"{path_prefix}FL_vs_AZ.png")
 
     # Texas vs. Louisiana
     LA_pre, LA_post = pre_post_analysis(LA, year)
     FL_vs_LA = alt.layer(FL_pre_post_chart, LA_pre + LA_post, line).properties(
-        title="Overdose Death Rates in Texas vs. Louisiana"
+        title="Overdose Death Rates in Florida vs. Louisiana"
     )
     FL_vs_LA.save(f"{path_prefix}FL_vs_LA.png")
 
     # Texas vs. Colorado
     CO_pre, CO_post = pre_post_analysis(CO, year)
     FL_vs_CO = alt.layer(FL_pre_post_chart, CO_pre + CO_post, line).properties(
-        title="Overdose Death Rates in Texas vs. Colorado"
+        title="Overdose Death Rates in Florida vs. Colorado"
     )
     FL_vs_CO.save(f"{path_prefix}FL_vs_CO.png")
