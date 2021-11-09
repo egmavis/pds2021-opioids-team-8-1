@@ -1,5 +1,4 @@
 00_source_data/*.csv
 *.txt
 *.tsv
-*.log
-__pycache__/
+
