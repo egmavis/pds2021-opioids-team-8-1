@@ -81,4 +81,5 @@ overdose_deaths.to_csv(
     "~/720/pds2021-opioids-team-8-1/20_intermediate_files/Death_and_Population.csv"
 )
 overdose_deaths.to_parquet(
-    "~/720/pds2021-opioids-team-8-1/20_intermediate_files/Death_and_Population.gzip",
+    "~/720/pds2021-opioids-team-8-1/20_intermediate_files/Death_and_Population.gzip"
+)
