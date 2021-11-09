@@ -1,10 +1,11 @@
 import pandas as pd
 import numpy as np
 import altair as alt
+from altair_saver import save
 import statsmodels.formula.api as smf
 
 data = pd.read_csv(
-    "https://raw.githubusercontent.com/MIDS-at-Duke/pds2021-opioids-team-8-1/main/20_intermediate_files/Death_and_Population.csv?token=AQURHZAMNI56MOEM2UQPDVLBRZOA6"
+    "~/720/pds2021-opioids-team-8-1/20_intermediate_files/Death_and_Population.csv"
 )
 
 # double check that there are no duplicates and no missing values
@@ -275,4 +276,11 @@ wash_vs_arz = alt.layer(wa_chart, arz_chart, line).properties(
 )
 wash_vs_col = alt.layer(wa_chart, col_chart, line).properties(
     title="Overdose Death Rates in Washington vs. Colorado"
+)
+
+pre_post_chart.save("pre_post_chart.png")
+
+save(
+    pre_post_chart,
+    "~/720/pds2021-opioids-team-8-1/30_results/overdose_death/pre_post_chart.png",
 )
