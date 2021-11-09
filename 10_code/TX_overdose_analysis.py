@@ -35,19 +35,23 @@ def get_ols_prediction(df, grid, x, y):
     return predictions
 
 
-def get_regression_chart(df, x, y):
+def get_regression_chart(df, x, y, color):
     regression_chart = (
         alt.Chart(df)
-        .mark_line()
+        .mark_line(
+            color=color
+        )
         .encode(x=x, y=alt.Y(y, scale=alt.Scale(zero=False)))
     )
     return regression_chart
 
 
-def get_ci_chart(df, x, y):
+def get_ci_chart(df, x, y, color):
     ci_chart = (
         alt.Chart(df)
-        .mark_errorband()
+        .mark_errorband(
+            color=color
+        )
         .encode(
             x=x,
             y=alt.Y("ci_low", title=y),
@@ -57,7 +61,7 @@ def get_ci_chart(df, x, y):
     return ci_chart
 
 
-def pre_post_analysis(dataframe, year):
+def pre_post_analysis(dataframe, year, color):
     x = "Year"
     y = "Overdose_death_per_capita"
     before = dataframe[dataframe["Year"] < year]
@@ -65,13 +69,13 @@ def pre_post_analysis(dataframe, year):
     
     before_grid = get_plot_grid(before, x, y)
     before_predictions = get_ols_prediction(before, before_grid, x, y)
-    before_reg_chart = get_regression_chart(before_predictions, x, y)
-    before_ci_chart = get_ci_chart(before_predictions, x, y)
+    before_reg_chart = get_regression_chart(before_predictions, x, y, color)
+    before_ci_chart = get_ci_chart(before_predictions, x, y, color)
 
     after_grid = get_plot_grid(after, x, y)
     after_predictions = get_ols_prediction(after, after_grid, x, y)
-    after_reg_chart = get_regression_chart(after_predictions, x, y)
-    after_ci_chart = get_ci_chart(after_predictions, x, y)
+    after_reg_chart = get_regression_chart(after_predictions, x, y, color)
+    after_ci_chart = get_ci_chart(after_predictions, x, y, color)
     return before_reg_chart + before_ci_chart, after_reg_chart + after_ci_chart
 
 
@@ -90,27 +94,30 @@ if __name__ == "__main__":
 
     # Pre-post analysis
     line = get_vertical_line(2007)
-    TX_pre, TX_post = pre_post_analysis(TX, 2007)
-    TX_pre_post_chart = alt.layer(TX_pre, TX_post, line).properties()
+    TX_pre, TX_post = pre_post_analysis(TX, 2007, "blue")
+    TX_pre_post_chart = alt.layer(TX_pre, TX_post, line).properties(
+        title="Overdose Death Rates in Texas"
+    )
     TX_pre_post_chart.save(f"{path_prefix}TX.png")
 
     # The diff-in-diff charts between each comparison state
     # Texas vs. Wisconsin
-    WI_pre, WI_post = pre_post_analysis(WI, 2007)
+    ref_color = "green"
+    WI_pre, WI_post = pre_post_analysis(WI, 2007, ref_color)
     TX_vs_WI = alt.layer(TX_pre_post_chart, WI_pre + WI_post, line).properties(
         title="Overdose Death Rates in Texas vs. Wisconsin"
     )
     TX_vs_WI.save(f"{path_prefix}TX_vs_WI.png")
 
     # Texas vs. Mississippi
-    MS_pre, MS_post = pre_post_analysis(MS, 2007)
+    MS_pre, MS_post = pre_post_analysis(MS, 2007, ref_color)
     TX_vs_MS = alt.layer(TX_pre_post_chart, MS_pre + MS_post, line).properties(
         title="Overdose Death Rates in Texas vs. Mississippi"
     )
     TX_vs_MS.save(f"{path_prefix}TX_vs_MS.png")
 
     # Texas vs. Kansas
-    KS_pre, KS_post = pre_post_analysis(KS, 2007)
+    KS_pre, KS_post = pre_post_analysis(KS, 2007, ref_color)
     TX_vs_KS = alt.layer(TX_pre_post_chart, KS_pre + KS_post, line).properties(
         title="Overdose Death Rates in Texas vs. Kansas"
     )
