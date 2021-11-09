@@ -280,7 +280,21 @@ wash_vs_col = alt.layer(wa_chart, col_chart, line).properties(
 
 pre_post_chart.save("pre_post_chart.png")
 
+
+# saving charts as png files
 save(
     pre_post_chart,
-    "~/720/pds2021-opioids-team-8-1/30_results/overdose_death/pre_post_chart.png",
+    "/Users/emeliamavis/720/pds2021-opioids-team-8-1/30_results/overdose_death/wash_pre_post.png",
+)
+save(
+    wash_vs_okl,
+    "/Users/emeliamavis/720/pds2021-opioids-team-8-1/30_results/overdose_death/wash_vs_okl.png",
+)
+save(
+    wash_vs_arz,
+    "/Users/emeliamavis/720/pds2021-opioids-team-8-1/30_results/overdose_death/wash_vs_arz.png",
+)
+save(
+    wash_vs_col,
+    "/Users/emeliamavis/720/pds2021-opioids-team-8-1/30_results/overdose_death/wash_vs_col.png",
 )
