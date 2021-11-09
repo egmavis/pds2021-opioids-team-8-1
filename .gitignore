@@ -2,7 +2,3 @@
 *.txt
 *.tsv
 
-*.log
-
-*.tsv.gz
-
