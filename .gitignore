@@ -1,4 +1,6 @@
 00_source_data/*.csv
 *.txt
 *.tsv
-
+__pycache__/
+*.log
+*.DS_Store
