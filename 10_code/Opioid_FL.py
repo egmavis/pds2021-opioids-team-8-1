@@ -46,23 +46,25 @@ dff1["TRANSACTION_DATE"].isna().sum()
 
 
 # %%
-# Change date to year
-dff1["YEAR"] = pd.to_datetime(dff1["TRANSACTION_DATE"], format="%m%d%Y")
-dff1["YEAR"] = pd.DatetimeIndex(dff1["YEAR"]).year
+# Change date to year and month
+dff1["TRANS_TIME"] = pd.to_datetime(dff1["TRANSACTION_DATE"], format="%m%d%Y")
+dff1["YEAR"] = pd.DatetimeIndex(dff1["TRANS_TIME"]).year
+dff1["MONTH"] = pd.DatetimeIndex(dff1["TRANS_TIME"]).month
 dff1.drop(columns=["TRANSACTION_DATE"], axis=1)
 dff1
 
 
 # %%
-# Group by County and year and calculate opioid quantity.
+# Group by County and year and month and calculate opioid quantity.
 dff_by_county = (
-    dff1.groupby(["BUYER_STATE", "BUYER_COUNTY", "YEAR"]).sum().reset_index()
+    dff1.groupby(["BUYER_STATE", "BUYER_COUNTY", "YEAR", "MONTH"]).sum().reset_index()
 )
-dff_by_county["MME"] = (
+# MME is the equivalent quantity of opioid shipped that we calculate.
+dff_by_county["MME_yearly"] = (
     dff_by_county["CALC_BASE_WT_IN_GM"] * 1000 * dff_by_county["MME_Conversion_Factor"]
 )
 dff_by_county
-final_columns = ["BUYER_STATE", "BUYER_COUNTY", "YEAR", "MME"]
+final_columns = ["BUYER_STATE", "BUYER_COUNTY", "MONTH", "YEAR", "MME_yearly"]
 dff_final = dff_by_county[final_columns]
 dff_final
 

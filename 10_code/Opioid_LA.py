@@ -38,22 +38,22 @@ assert not dfl1["TRANSACTION_DATE"].isnull().any()
 
 # %%
 # Change date variable to year
-dfl1["YEAR"] = pd.to_datetime(dfl1["TRANSACTION_DATE"], format="%m%d%Y")
-dfl1["YEAR"] = pd.DatetimeIndex(dfl1["YEAR"]).year
-
+dfl1["TRANS_TIME"] = pd.to_datetime(dfl1["TRANSACTION_DATE"], format="%m%d%Y")
+dfl1["YEAR"] = pd.DatetimeIndex(dfl1["TRANS_TIME"]).year
+dfl1["MONTH"] = pd.DatetimeIndex(dfl1["TRANS_TIME"]).month
 dfl1
 
 
 # %%
 # Group by County and year and calculate opioid quantity.
 dfl_by_county = (
-    dfl1.groupby(["BUYER_STATE", "BUYER_COUNTY", "YEAR"]).sum().reset_index()
+    dfl1.groupby(["BUYER_STATE", "BUYER_COUNTY", "YEAR", "MONTH"]).sum().reset_index()
 )
-dfl_by_county["MME"] = (
+dfl_by_county["MME_monthly"] = (
     dfl_by_county["CALC_BASE_WT_IN_GM"] * 1000 * dfl_by_county["MME_Conversion_Factor"]
 )
 dfl_by_county
-final_columns = ["BUYER_STATE", "BUYER_COUNTY", "YEAR", "MME"]
+final_columns = ["BUYER_STATE", "BUYER_COUNTY", "MONTH", "YEAR", "MME_monthly"]
 dfl_final = dfl_by_county[final_columns]
 dfl_final
 
