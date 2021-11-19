@@ -1,0 +1,7 @@
+wkVars = 
+            {
+                'regentBrowseService': 'https://prd-regent-na-cf.cch.com/osa/browse',
+                'cpid': 'WKUS-Legal-Cheetah',
+                'token': 'WIXNVdtum0AQ/RW078ByDV4ZIsduJEtO1BYrqvq2hoFsA7sRuwTn2/rQT+ovdCHBiXNxUqmV8sZcz5mj2eH3z1/T421dGTfQSCZ4jBwLIwN4JnLGyxi1qjAjdJxMU8jahqnbtbgCbugSLslW5jG6VOqa2HbXdVbnWaIpbRdjx/52tkqzS6gp2iWzt5NNxqWiPIP7ql2FhOaGZSCtTlRKc72q2g4aKxO1rW6vQdr6qxYcJVNJ68olM6krlJ7IWErZwnJoq2LkYufIxKHpuGvHIU5AcGCFR9F3ZFyMCri9Anech15ahIYTQSWThNMaJFEZSWdnK6IzCR2BdtADYJPM1qtZOrX3fPcZabv5AZkazXPddLkwTkVTU/U6mmM5g4flZjGkkpbLa8hYwSBHRt/lS0ur3mxiNMCjxI9cPJkEI487qCc85oIXrG+opzgQWlBFjXOhTkDDwwEpkxHtlSaH4k9jIx+dk7M+Qf4dhYe63Wa06pKniiqogStjMN+xHinIfj2WPIdtjD65/jzCC2zOHF3gny5c88QLJ2aAceguJif41JmjPURNRMFWveSbV3qJvkKRLPMZzz9roxNNPk7wYuajLnoIlmnteNlbon+jyePat+IPzOyXBNpBKdWwTavg9ciwgvebRypRMr7M0bOsC1q1YOhrQPqHG6OtfmY6xMuHQ/HfjkpCaR4UXl7gzMcQFTQPKfgBxf4m8OAo9DY0pDTw/J0We6yTZ+7DGrT6NMy1WqVobj+YECsoafVvpqRZJlquPtiAkVsUoeeEBY6w40abwJlQ1/MmuU9hg98/+VPPo/UfQ+MfQHv2/pLJH+DahZ4*',
+                'widgetTrackingPage': 'widget_analytics'
+            }
