@@ -19,8 +19,8 @@ pooled = data[
 ]
 
 # break washington into pre and post subsets for pre-post and diff-in-diff analyses
-texas_pre = wash[wash.Year < 2007]
-texas_post = wash[wash.Year >= 2007]
+texas_pre = texas[texas.Year < 2007]
+texas_post = texas[texas.Year >= 2007]
 
 # break pooled states into pre and post subsets for diff-in-diff analysis
 pooled_pre = pooled[pooled.Year < 2007]
@@ -78,7 +78,7 @@ texas_pre_ci = (
 )
 
 """
-Washington Post-Policy Charts
+Texas Post-Policy Charts
 """
 # Grid for predicted values
 texas_post_x = texas_post.loc[pd.notnull(texas_post[yvar]), xvar]
@@ -218,6 +218,6 @@ save(
     "/Users/emeliamavis/720/pds2021-opioids-team-8-1/30_results/overdose_death/NEW_PLOTS_FOR_FINAL/texas_pre_post.png",
 )
 save(
-    pre_post_chart,
+    texas_vs_pooled,
     "/Users/emeliamavis/720/pds2021-opioids-team-8-1/30_results/overdose_death/NEW_PLOTS_FOR_FINAL/texas_vs_pooled.png",
 )
