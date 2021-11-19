@@ -13,22 +13,22 @@ assert ~data.duplicated(["Year", "State", "County"]).any()
 assert ~data.isna().any().sum()
 
 # subset to target states
-wash = data[data.State == "WA"]
+texas = data[data.State == "TX"]
 pooled = data[
-    (data["State"] == "OK") | (data["State"] == "AZ") | (data["State"] == "CO")
+    (data["State"] == "WI") | (data["State"] == "MS") | (data["State"] == "KS")
 ]
 
 # break washington into pre and post subsets for pre-post and diff-in-diff analyses
-wash_pre = wash[wash.Year < 2012]
-wash_post = wash[wash.Year >= 2012]
+texas_pre = wash[wash.Year < 2007]
+texas_post = wash[wash.Year >= 2007]
 
 # break pooled states into pre and post subsets for diff-in-diff analysis
-pooled_pre = pooled[pooled.Year < 2012]
-pooled_post = pooled[pooled.Year >= 2012]
+pooled_pre = pooled[pooled.Year < 2007]
+pooled_post = pooled[pooled.Year >= 2007]
 
 # add vertical line for year = 2012 (policy change)
 line = (
-    alt.Chart(pd.DataFrame({"Year": [2012]})).mark_rule(color="red").encode(x="Year:Q")
+    alt.Chart(pd.DataFrame({"Year": [2007]})).mark_rule(color="red").encode(x="Year:Q")
 )
 
 # same arguments for each chart
@@ -41,32 +41,34 @@ PRE-POST CHART BUILDING
 """
 
 """
-Washington Pre-Policy Charts
+Texas Pre-Policy Charts
 """
 # Grid for predicted values
-wash_pre_x = wash_pre.loc[pd.notnull(wash_pre[yvar]), xvar]
-wash_pre_xmin = wash_pre_x.min()
-wash_pre_xmax = wash_pre_x.max()
-wash_pre_step = (wash_pre_xmax - wash_pre_xmin) / 100
-wash_pre_grid = np.arange(wash_pre_xmin, wash_pre_xmax + wash_pre_step, wash_pre_step)
-wash_pre_predictions = pd.DataFrame({xvar: wash_pre_grid})
+texas_pre_x = texas_pre.loc[pd.notnull(texas_pre[yvar]), xvar]
+texas_pre_xmin = texas_pre_x.min()
+texas_pre_xmax = texas_pre_x.max()
+texas_pre_step = (texas_pre_xmax - texas_pre_xmin) / 100
+texas_pre_grid = np.arange(
+    texas_pre_xmin, texas_pre_xmax + texas_pre_step, texas_pre_step
+)
+texas_pre_predictions = pd.DataFrame({xvar: texas_pre_grid})
 
 # Fit model, get predictions
-wash_pre_model = smf.ols(f"{yvar} ~ {xvar}", data=wash_pre).fit()
-wash_pre_model_predict = wash_pre_model.get_prediction(wash_pre_predictions[xvar])
-wash_pre_predictions[yvar] = wash_pre_model_predict.summary_frame()["mean"]
-wash_pre_predictions[["ci_low", "ci_high"]] = wash_pre_model_predict.conf_int(
+texas_pre_model = smf.ols(f"{yvar} ~ {xvar}", data=texas_pre).fit()
+texas_pre_model_predict = texas_pre_model.get_prediction(texas_pre_predictions[xvar])
+texas_pre_predictions[yvar] = texas_pre_model_predict.summary_frame()["mean"]
+texas_pre_predictions[["ci_low", "ci_high"]] = texas_pre_model_predict.conf_int(
     alpha=alpha
 )
 
 # Build chart
-wash_pre_reg = (
-    alt.Chart(wash_pre_predictions)
+texas_pre_reg = (
+    alt.Chart(texas_pre_predictions)
     .mark_line()
     .encode(x=xvar, y=alt.Y(yvar, scale=alt.Scale(zero=False)))
 )
-wash_pre_ci = (
-    alt.Chart(wash_pre_predictions)
+texas_pre_ci = (
+    alt.Chart(texas_pre_predictions)
     .mark_errorband()
     .encode(
         x=xvar,
@@ -79,31 +81,31 @@ wash_pre_ci = (
 Washington Post-Policy Charts
 """
 # Grid for predicted values
-wash_post_x = wash_post.loc[pd.notnull(wash_post[yvar]), xvar]
-wash_post_xmin = wash_post_x.min()
-wash_post_xmax = wash_post_x.max()
-wash_post_step = (wash_post_xmax - wash_post_xmin) / 100
-wash_post_grid = np.arange(
-    wash_post_xmin, wash_post_xmax + wash_post_step, wash_post_step
+texas_post_x = texas_post.loc[pd.notnull(texas_post[yvar]), xvar]
+texas_post_xmin = texas_post_x.min()
+texas_post_xmax = texas_post_x.max()
+texas_post_step = (texas_post_xmax - texas_post_xmin) / 100
+texas_post_grid = np.arange(
+    texas_post_xmin, texas_post_xmax + texas_post_step, texas_post_step
 )
-wash_post_predictions = pd.DataFrame({xvar: wash_post_grid})
+texas_post_predictions = pd.DataFrame({xvar: texas_post_grid})
 
 # Fit model, get predictions
-wash_post_model = smf.ols(f"{yvar} ~ {xvar}", data=wash_post).fit()
-wash_post_model_predict = wash_post_model.get_prediction(wash_post_predictions[xvar])
-wash_post_predictions[yvar] = wash_post_model_predict.summary_frame()["mean"]
-wash_post_predictions[["ci_low", "ci_high"]] = wash_post_model_predict.conf_int(
+texas_post_model = smf.ols(f"{yvar} ~ {xvar}", data=texas_post).fit()
+texas_post_model_predict = texas_post_model.get_prediction(texas_post_predictions[xvar])
+texas_post_predictions[yvar] = texas_post_model_predict.summary_frame()["mean"]
+texas_post_predictions[["ci_low", "ci_high"]] = texas_post_model_predict.conf_int(
     alpha=alpha
 )
 
 # Build chart
-wash_post_reg = (
-    alt.Chart(wash_post_predictions)
+texas_post_reg = (
+    alt.Chart(texas_post_predictions)
     .mark_line()
     .encode(x=xvar, y=alt.Y(yvar, scale=alt.Scale(zero=False)))
 )
-wash_post_ci = (
-    alt.Chart(wash_post_predictions)
+texas_post_ci = (
+    alt.Chart(texas_post_predictions)
     .mark_errorband()
     .encode(
         x=xvar,
@@ -189,8 +191,8 @@ pooled_post_ci = (
 )
 
 # put the charts together
-wash_pre_chart = wash_pre_ci + wash_pre_reg
-wash_post_chart = wash_post_ci + wash_post_reg
+texas_pre_chart = texas_pre_ci + texas_pre_reg
+texas_post_chart = texas_post_ci + texas_post_reg
 pooled_pre_chart = pooled_pre_ci + pooled_pre_reg
 pooled_post_chart = pooled_post_ci + pooled_post_reg
 
@@ -198,24 +200,24 @@ pooled_post_chart = pooled_post_ci + pooled_post_reg
 """
 PRE-POST ANALYSIS
 """
-pre_post_chart = alt.layer(wash_pre_chart, wash_post_chart, line).properties(
-    title="Overdose Deaths in Washington Before and After 2012 (Policy Change)"
+pre_post_chart = alt.layer(texas_pre_chart, texas_post_chart, line).properties(
+    title="Overdose Deaths in Texas Before and After 2007 (Policy Change)"
 )
 
 """
 DIFFERENCE-IN-DIFFERENCE ANALYSIS
 """
-wash_vs_pooled = alt.layer(
-    wash_pre_chart, wash_post_chart, pooled_pre_chart, pooled_post_chart, line
-).properties(title="Pre- and Post- Policy Trends In Washington and Control States")
+texas_vs_pooled = alt.layer(
+    texas_pre_chart, texas_post_chart, pooled_pre_chart, pooled_post_chart, line
+).properties(title="Pre- and Post- Policy Trends In Texas and Control States")
 
 
 # saving charts as png files
 save(
     pre_post_chart,
-    "/Users/emeliamavis/720/pds2021-opioids-team-8-1/30_results/overdose_death/NEW_PLOTS_FOR_FINAL/wash_pre_post.png",
+    "/Users/emeliamavis/720/pds2021-opioids-team-8-1/30_results/overdose_death/NEW_PLOTS_FOR_FINAL/texas_pre_post.png",
 )
 save(
-    wash_vs_pooled,
-    "/Users/emeliamavis/720/pds2021-opioids-team-8-1/30_results/overdose_death/NEW_PLOTS_FOR_FINAL/wash_vs_pooled.png",
+    pre_post_chart,
+    "/Users/emeliamavis/720/pds2021-opioids-team-8-1/30_results/overdose_death/NEW_PLOTS_FOR_FINAL/texas_vs_pooled.png",
 )
