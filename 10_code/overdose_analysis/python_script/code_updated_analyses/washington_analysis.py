@@ -216,6 +216,6 @@ save(
     "/Users/emeliamavis/720/pds2021-opioids-team-8-1/30_results/overdose_death/NEW_PLOTS_FOR_FINAL/wash_pre_post.png",
 )
 save(
-    wash_vs_pooled,
+    pre_post_chart,
     "/Users/emeliamavis/720/pds2021-opioids-team-8-1/30_results/overdose_death/NEW_PLOTS_FOR_FINAL/wash_vs_pooled.png",
 )

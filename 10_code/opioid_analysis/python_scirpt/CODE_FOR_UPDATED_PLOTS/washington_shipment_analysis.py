@@ -5,12 +5,18 @@ from altair_saver import save
 import statsmodels.formula.api as smf
 
 data = pd.read_csv(
-    "~/720/pds2021-opioids-team-8-1/20_intermediate_files/Death_and_Population.csv"
+    "~/720/pds2021-opioids-team-8-1/20_intermediate_files/Death_Population_Shipments.csv"
 )
 
 # double check that there are no duplicates and no missing values
-assert ~data.duplicated(["Year", "State", "County"]).any()
+assert ~data.duplicated(["Year", "Month", "State", "County"]).any()
 assert ~data.isna().any().sum()
+
+# adding columns for unique year-month x values and a one-word y value
+data.Month = data.Month.astype("float64")
+data["to_add"] = data.Month / 100
+data["Date"] = data.Year + data.to_add
+data["Rate"] = data["Monthly Shipment Rate Per Capita"]
 
 # subset to target states
 wash = data[data.State == "WA"]
@@ -28,12 +34,14 @@ pooled_post = pooled[pooled.Year >= 2012]
 
 # add vertical line for year = 2012 (policy change)
 line = (
-    alt.Chart(pd.DataFrame({"Year": [2012]})).mark_rule(color="red").encode(x="Year:Q")
+    alt.Chart(pd.DataFrame({"Date": [2012.01]}))
+    .mark_rule(color="red")
+    .encode(x="Date:Q")
 )
 
 # same arguments for each chart
 yvar = "Rate"
-xvar = "Year"
+xvar = "Date"
 alpha = 0.05
 
 """
@@ -194,28 +202,23 @@ wash_post_chart = wash_post_ci + wash_post_reg
 pooled_pre_chart = pooled_pre_ci + pooled_pre_reg
 pooled_post_chart = pooled_post_ci + pooled_post_reg
 
-
-"""
-PRE-POST ANALYSIS
-"""
 pre_post_chart = alt.layer(wash_pre_chart, wash_post_chart, line).properties(
-    title="Overdose Deaths in Washington Before and After 2012 (Policy Change)"
+    title="Opioid Shipment Rate in Washington Before and After 2012 (Policy Change)"
 )
-
-"""
-DIFFERENCE-IN-DIFFERENCE ANALYSIS
-"""
 wash_vs_pooled = alt.layer(
     wash_pre_chart, wash_post_chart, pooled_pre_chart, pooled_post_chart, line
-).properties(title="Pre- and Post- Policy Trends In Washington and Control States")
+).properties(
+    title="Pre- and Post- Policy Opioid Shipment Rates In Washington and Control States"
+)
 
 
 # saving charts as png files
 save(
     pre_post_chart,
-    "/Users/emeliamavis/720/pds2021-opioids-team-8-1/30_results/overdose_death/NEW_PLOTS_FOR_FINAL/wash_pre_post.png",
+    "/Users/emeliamavis/720/pds2021-opioids-team-8-1/30_results/shipment/NEW_PLOTS_FOR_FINAL/washington_shipment_pre_post.png",
 )
+
 save(
     wash_vs_pooled,
-    "/Users/emeliamavis/720/pds2021-opioids-team-8-1/30_results/overdose_death/NEW_PLOTS_FOR_FINAL/wash_vs_pooled.png",
+    "/Users/emeliamavis/720/pds2021-opioids-team-8-1/30_results/shipment/NEW_PLOTS_FOR_FINAL/washington_shipment_vs_pooled.png",
 )

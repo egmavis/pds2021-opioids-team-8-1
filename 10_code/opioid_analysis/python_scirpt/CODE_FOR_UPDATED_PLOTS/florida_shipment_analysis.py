@@ -5,68 +5,74 @@ from altair_saver import save
 import statsmodels.formula.api as smf
 
 data = pd.read_csv(
-    "~/720/pds2021-opioids-team-8-1/20_intermediate_files/Death_and_Population.csv"
+    "~/720/pds2021-opioids-team-8-1/20_intermediate_files/Death_Population_Shipments.csv"
 )
 
 # double check that there are no duplicates and no missing values
-assert ~data.duplicated(["Year", "State", "County"]).any()
+assert ~data.duplicated(["Year", "Month", "State", "County"]).any()
 assert ~data.isna().any().sum()
 
+# adding columns for unique year-month x values and a one-word y value
+data.Month = data.Month.astype("float64")
+data["to_add"] = data.Month / 100
+data["Date"] = data.Year + data.to_add
+data["Rate"] = data["Monthly Shipment Rate Per Capita"]
+
 # subset to target states
-wash = data[data.State == "WA"]
+florida = data[data.State == "FL"]
 pooled = data[
-    (data["State"] == "OK") | (data["State"] == "AZ") | (data["State"] == "CO")
+    (data["State"] == "LA") | (data["State"] == "AZ") | (data["State"] == "CO")
 ]
 
-# break washington into pre and post subsets for pre-post and diff-in-diff analyses
-wash_pre = wash[wash.Year < 2012]
-wash_post = wash[wash.Year >= 2012]
+# break florida into pre and post subsets for pre-post analysis
+flo_pre = florida[florida.Year < 2010]
+flo_post = florida[florida.Year >= 2010]
 
 # break pooled states into pre and post subsets for diff-in-diff analysis
-pooled_pre = pooled[pooled.Year < 2012]
-pooled_post = pooled[pooled.Year >= 2012]
+pooled_pre = pooled[pooled.Year < 2010]
+pooled_post = pooled[pooled.Year >= 2010]
 
-# add vertical line for year = 2012 (policy change)
+# add vertical line for year = 2010 (policy change)
 line = (
-    alt.Chart(pd.DataFrame({"Year": [2012]})).mark_rule(color="red").encode(x="Year:Q")
+    alt.Chart(pd.DataFrame({"Date": [2010.01]}))
+    .mark_rule(color="red")
+    .encode(x="Date:Q")
 )
 
 # same arguments for each chart
 yvar = "Rate"
-xvar = "Year"
+xvar = "Date"
 alpha = 0.05
 
 """
-PRE-POST CHART BUILDING
+PRE-POST ANALYSIS
 """
 
 """
-Washington Pre-Policy Charts
+Florida Pre-Policy Chart
 """
 # Grid for predicted values
-wash_pre_x = wash_pre.loc[pd.notnull(wash_pre[yvar]), xvar]
-wash_pre_xmin = wash_pre_x.min()
-wash_pre_xmax = wash_pre_x.max()
-wash_pre_step = (wash_pre_xmax - wash_pre_xmin) / 100
-wash_pre_grid = np.arange(wash_pre_xmin, wash_pre_xmax + wash_pre_step, wash_pre_step)
-wash_pre_predictions = pd.DataFrame({xvar: wash_pre_grid})
+flo_pre_x = flo_pre.loc[pd.notnull(flo_pre[yvar]), xvar]
+flo_pre_xmin = flo_pre_x.min()
+flo_pre_xmax = flo_pre_x.max()
+flo_pre_step = (flo_pre_xmax - flo_pre_xmin) / 100
+flo_pre_grid = np.arange(flo_pre_xmin, flo_pre_xmax + flo_pre_step, flo_pre_step)
+flo_pre_predictions = pd.DataFrame({xvar: flo_pre_grid})
 
 # Fit model, get predictions
-wash_pre_model = smf.ols(f"{yvar} ~ {xvar}", data=wash_pre).fit()
-wash_pre_model_predict = wash_pre_model.get_prediction(wash_pre_predictions[xvar])
-wash_pre_predictions[yvar] = wash_pre_model_predict.summary_frame()["mean"]
-wash_pre_predictions[["ci_low", "ci_high"]] = wash_pre_model_predict.conf_int(
-    alpha=alpha
-)
+flo_pre_model = smf.ols(f"{yvar} ~ {xvar}", data=flo_pre).fit()
+flo_pre_model_predict = flo_pre_model.get_prediction(flo_pre_predictions[xvar])
+flo_pre_predictions[yvar] = flo_pre_model_predict.summary_frame()["mean"]
+flo_pre_predictions[["ci_low", "ci_high"]] = flo_pre_model_predict.conf_int(alpha=alpha)
 
 # Build chart
-wash_pre_reg = (
-    alt.Chart(wash_pre_predictions)
+flo_pre_reg = (
+    alt.Chart(flo_pre_predictions)
     .mark_line()
     .encode(x=xvar, y=alt.Y(yvar, scale=alt.Scale(zero=False)))
 )
-wash_pre_ci = (
-    alt.Chart(wash_pre_predictions)
+flo_pre_ci = (
+    alt.Chart(flo_pre_predictions)
     .mark_errorband()
     .encode(
         x=xvar,
@@ -76,34 +82,32 @@ wash_pre_ci = (
 )
 
 """
-Washington Post-Policy Charts
+Florida Post-Policy Chart
 """
 # Grid for predicted values
-wash_post_x = wash_post.loc[pd.notnull(wash_post[yvar]), xvar]
-wash_post_xmin = wash_post_x.min()
-wash_post_xmax = wash_post_x.max()
-wash_post_step = (wash_post_xmax - wash_post_xmin) / 100
-wash_post_grid = np.arange(
-    wash_post_xmin, wash_post_xmax + wash_post_step, wash_post_step
-)
-wash_post_predictions = pd.DataFrame({xvar: wash_post_grid})
+flo_post_x = flo_post.loc[pd.notnull(flo_post[yvar]), xvar]
+flo_post_xmin = flo_post_x.min()
+flo_post_xmax = flo_post_x.max()
+flo_post_step = (flo_post_xmax - flo_post_xmin) / 100
+flo_post_grid = np.arange(flo_post_xmin, flo_post_xmax + flo_post_step, flo_post_step)
+flo_post_predictions = pd.DataFrame({xvar: flo_post_grid})
 
 # Fit model, get predictions
-wash_post_model = smf.ols(f"{yvar} ~ {xvar}", data=wash_post).fit()
-wash_post_model_predict = wash_post_model.get_prediction(wash_post_predictions[xvar])
-wash_post_predictions[yvar] = wash_post_model_predict.summary_frame()["mean"]
-wash_post_predictions[["ci_low", "ci_high"]] = wash_post_model_predict.conf_int(
+flo_post_model = smf.ols(f"{yvar} ~ {xvar}", data=flo_post).fit()
+flo_post_model_predict = flo_post_model.get_prediction(flo_post_predictions[xvar])
+flo_post_predictions[yvar] = flo_post_model_predict.summary_frame()["mean"]
+flo_post_predictions[["ci_low", "ci_high"]] = flo_post_model_predict.conf_int(
     alpha=alpha
 )
 
 # Build chart
-wash_post_reg = (
-    alt.Chart(wash_post_predictions)
+flo_post_reg = (
+    alt.Chart(flo_post_predictions)
     .mark_line()
     .encode(x=xvar, y=alt.Y(yvar, scale=alt.Scale(zero=False)))
 )
-wash_post_ci = (
-    alt.Chart(wash_post_predictions)
+flo_post_ci = (
+    alt.Chart(flo_post_predictions)
     .mark_errorband()
     .encode(
         x=xvar,
@@ -189,33 +193,35 @@ pooled_post_ci = (
 )
 
 # put the charts together
-wash_pre_chart = wash_pre_ci + wash_pre_reg
-wash_post_chart = wash_post_ci + wash_post_reg
+flo_pre_chart = flo_pre_ci + flo_pre_reg
+flo_post_chart = flo_post_ci + flo_post_reg
 pooled_pre_chart = pooled_pre_ci + pooled_pre_reg
 pooled_post_chart = pooled_post_ci + pooled_post_reg
-
 
 """
 PRE-POST ANALYSIS
 """
-pre_post_chart = alt.layer(wash_pre_chart, wash_post_chart, line).properties(
-    title="Overdose Deaths in Washington Before and After 2012 (Policy Change)"
+pre_post_chart = alt.layer(flo_pre_chart, flo_post_chart, line).properties(
+    title="Opioid Shipment Rate in Florida Before and After 2010 (Policy Change)"
 )
 
 """
 DIFFERENCE-IN-DIFFERENCE ANALYSIS
 """
-wash_vs_pooled = alt.layer(
-    wash_pre_chart, wash_post_chart, pooled_pre_chart, pooled_post_chart, line
-).properties(title="Pre- and Post- Policy Trends In Washington and Control States")
+flor_vs_pooled = alt.layer(
+    flo_pre_chart, flo_post_chart, pooled_pre_chart, pooled_post_chart, line
+).properties(
+    title="Pre- and Post- Policy Opioid Shipment Rates In Flordia and Control States"
+)
 
 
 # saving charts as png files
 save(
     pre_post_chart,
-    "/Users/emeliamavis/720/pds2021-opioids-team-8-1/30_results/overdose_death/NEW_PLOTS_FOR_FINAL/wash_pre_post.png",
+    "/Users/emeliamavis/720/pds2021-opioids-team-8-1/30_results/shipment/NEW_PLOTS_FOR_FINAL/florida_shipment_pre_post.png",
 )
+
 save(
-    wash_vs_pooled,
-    "/Users/emeliamavis/720/pds2021-opioids-team-8-1/30_results/overdose_death/NEW_PLOTS_FOR_FINAL/wash_vs_pooled.png",
+    flor_vs_pooled,
+    "/Users/emeliamavis/720/pds2021-opioids-team-8-1/30_results/shipment/NEW_PLOTS_FOR_FINAL/florida_shipment_vs_pooled.png",
 )

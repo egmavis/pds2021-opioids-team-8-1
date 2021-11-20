@@ -48,6 +48,10 @@ merged = pd.merge(
     indicator=True,
 )
 
+merged["Monthly Shipment Rate Per Capita"] = (
+    merged["MME_monthly"] / merged["Population"]
+)
+
 # last validity checks
 assert ~merged.isna().any().sum()
 assert ~merged.duplicated(["Year", "County", "State"]).any().sum()

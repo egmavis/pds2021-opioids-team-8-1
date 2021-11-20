@@ -5,17 +5,19 @@ from altair_saver import save
 import statsmodels.formula.api as smf
 
 data = pd.read_csv(
-    "~/Downloads/pds2021-opioids-team-8-1/20_intermediate_files/Death_Population_Shipments.csv"
+    "~/720/pds2021-opioids-team-8-1/20_intermediate_files/Death_Population_Shipments.csv"
 )
 
 # double check that there are no duplicates and no missing values
-assert ~data.duplicated(["Year", "State", "County"]).any()
-assert ~data.isna().any().sum()
 
-data["MME_per_Capita_in_milligram"] = data["MME"] / data.Population
+
+assert ~data.duplicated(["Year", "Month", "State", "County"]).any()
+assert ~data.isna().any().sum()
 
 # subset to target states
 florida = data[data.State == "FL"]
+washington = data[data.State == "WA"]
+
 arizona = data[data.State == "AZ"]
 colorado = data[data.State == "CO"]
 louisiana = data[data.State == "LA"]
